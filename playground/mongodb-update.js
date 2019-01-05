@@ -23,12 +23,12 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', { useNewUrlParser: true
   // Update user name and increment age
   db.collection('Users')
     .findOneAndUpdate(
-      { _id             : new ObjectID('5c2a00eb5c628b0bc0d2bfa7') },
+      { _id : new ObjectID('5c2a00eb5c628b0bc0d2bfa7') },
       { 
-        $set            : { name : 'Jorge' },
-        $inc            : { age  : 1 } 
+        $set : { name : 'Jorge' },
+        $inc : { age  : 1 } 
       },
-      { returnOriginal  : false }
+      { returnOriginal : false }
     )
     .then((result) => {
       console.log(result)
