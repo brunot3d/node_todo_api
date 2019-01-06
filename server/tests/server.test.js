@@ -42,3 +42,13 @@ describe('POST /add-todo', () => {
   })
 
 })
+
+describe('GET /list-todos', () => {
+  it('should return all to-dos in db'), (done) => {
+    request(app)
+      .get('/get-todos')
+      .expect(200)
+      .end(done)
+  }
+
+})

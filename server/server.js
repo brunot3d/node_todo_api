@@ -48,7 +48,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
 
   })
 
-  app.get('/getAllTodos', async (req, res) => {
+  app.get('/list-todos', async (req, res) => {
 
     try {
       const result = await db.collection('ToDos')
@@ -56,13 +56,24 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
         .toArray()
 
       console.log('Listing all to-dos')
-      res.send(result)
+      res.send({ length : result.length, results: result } )
 
     } catch (error) {
       console.log(error)
-      res.send(error)
+      res.status(400).send(error)
     }
 
+  })
+
+  app.post('/get-todos', (req, res) => {
+    db.collection('ToDos')
+      .find(req.body)
+      .toArray()
+      .then((docs) => {
+        res.send(docs)
+      }, (err) => {
+        res.status(400).send(err)
+      })
   })
 
   app.post('/delete-todo', async (req, res) => {
