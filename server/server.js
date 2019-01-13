@@ -9,7 +9,8 @@ app.use(bodyParser.json())
 const todoSchema = Joi.object().keys({
   text : Joi.string().required(),
   completed: Joi.boolean().default(false),
-  completedAt: Joi.any().default(null)
+  completedAt: Joi.any().default(null),
+  createdAt: Joi.date().default(new Date)
 })
 
 
@@ -31,8 +32,8 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
       if (err) {
         const error = new Error('Invalid Input')
 
-        error.status = 400
-        res.status(400).send(error)
+        error.status = 404
+        res.status(404).send(error)
       } else {
         db.collection('ToDos')
           .insertOne(result)
@@ -69,7 +70,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
     const id = req.params.id
 
     if (!ObjectId.isValid(id)) {
-      return res.status(400).send('Invalid to-do ID')
+      return res.status(404).send('Invalid to-do ID')
     }
 
     db.collection('ToDos')
@@ -81,7 +82,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
         todo.youSearchedAt = new Date()
         res.json(todo)
       }, (err) => {
-        res.status(400).send()
+        res.status(404).send()
       })
   })
 
