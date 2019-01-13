@@ -3,6 +3,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const Joi = require('joi')
 const app = express()
+const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
 
@@ -14,7 +15,7 @@ const todoSchema = Joi.object().keys({
 })
 
 
-MongoClient.connect('mongodb://localhost:27017/TodoApp', {
+MongoClient.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp', {
   useNewUrlParser: true
 }, (err, client) => {
   if (err) {
@@ -128,8 +129,8 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
 
 })
 
-app.listen(3000, () => {
-  console.log('Server started on port 3000')
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`)
   
 })
 
