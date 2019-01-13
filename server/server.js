@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require('mongodb')
+const { MongoClient, ObjectID } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
 const Joi = require('joi')
@@ -70,12 +70,12 @@ MongoClient.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoAp
   app.get('/get-todo/:id', (req, res) => {
     const id = req.params.id
 
-    if (!ObjectId.isValid(id)) {
-      return res.status(404).send('Invalid to-do ID')
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send('Invalid to-do Id format')
     }
 
     db.collection('ToDos')
-      .findOne({ _id : ObjectId(id) })
+      .findOne({ _id : ObjectID(id) })
       .then((todo) => {
         if (!todo) {
           return res.status(404).send('No to-do found')
@@ -87,17 +87,26 @@ MongoClient.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoAp
       })
   })
 
-  app.post('/delete-todo', async (req, res) => {
+  app.delete('/delete-todo/:id', async (req, res) => {
     try {
+      const id = req.params.id
+
+      if (!ObjectID.isValid(id)) {
+        return res.status(404).send('Invalid to-do Id format')
+      }
+
       await db.collection('ToDos')
-        .deleteOne(req.body, (err, result) => {
+        .deleteOne({ _id : new ObjectID(id) }, (err, result) => {
           if (err) throw err
-          console.log(`Deleting to-do: ${JSON.stringify(req.body)}`)
-          res.status(200).send()
+          console.log(`Deleting to-do (_id:${JSON.stringify(id)})`)
+          if (result.result.n === 0) {
+            return res.status(400).send('To-do not found to be deleted')
+          }
+          res.status(200).send(result.result)
         })
     } catch (err) {
       console.log(err)
-      res.status(400).send('Unable to delete todo', err)
+      res.status(400).send('Unable to delete todo')
     }
   })
 
