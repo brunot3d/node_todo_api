@@ -21,7 +21,7 @@ MongoClient.connect('mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds25578
   if (err) {
     return console.log('Unable to connect to server')
   }
-  const db = client.db('TodoApp')
+  const db = client.db('brunotdb')
   
   console.log('Connected to DB')
   app.emit('appStarted')
