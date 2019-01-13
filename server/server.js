@@ -1,10 +1,17 @@
-const { MongoClient, ObjectID } = require('mongodb')
+const { MongoClient, ObjectId } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
-
+const Joi = require('joi')
 const app = express()
 
 app.use(bodyParser.json())
+
+const todoSchema = Joi.object().keys({
+  text : Joi.string().required(),
+  completed: Joi.boolean().default(false),
+  completedAt: Joi.any().default(null)
+})
+
 
 MongoClient.connect('mongodb://localhost:27017/TodoApp', {
   useNewUrlParser: true
@@ -12,39 +19,32 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
   if (err) {
     return console.log('Unable to connect to server')
   }
-  console.log('Connected to DB')
   const db = client.db('TodoApp')
-
+  
+  console.log('Connected to DB')
   app.emit('appStarted')
 
   app.post('/add-todo', (req, res) => {
     const newTodo = req.body
 
-    
-    if (req.body.text === undefined || req.body.text.length === 0) {
-      return res.status(400).send('Unable to save todo - Missing \'text\' field')
-    } else if (req.body.completed && typeof req.body.completed !== 'boolean') {
-      return res.status(400).send('Unable to save todo - Invalid \'completed\' field')
-    }
-    if (req.body.completed === undefined) {
-      newTodo.completed = false
-    }
-    if (req.body.completedAt === undefined) {
-      newTodo.completedAt = null
-    }
-    
-    db.collection('ToDos')
-      .insertOne(newTodo)
-      .then((result) => {
-        // console.log(`ToDo '${req.body.text}' added to toDo list`)
-        // console.log(JSON.stringify(result.ops[0], undefined, 2))
-        res.status(200).send(result.ops[0])
-        // res.send(JSON.stringify(result.ops[0], undefined, 2))
-      }, (err) => {
-        console.log('Unable to save document to ToDos collection')
-        console.log(err)
-        res.satus(400).send('Unable to save document to ToDos collection')
-      })
+    Joi.validate(newTodo, todoSchema, (err, result) => {
+      if (err) {
+        const error = new Error('Invalid Input')
+
+        error.status = 400
+        res.status(400).send(error)
+      } else {
+        db.collection('ToDos')
+          .insertOne(result)
+          .then((result) => {
+            res.status(200).json({ result : result, document : result.ops[0], msg: 'Successfuly inserted to-do', error : null })
+          }, (err) => {
+            console.log('Unable to save document to ToDos collection')
+            console.log(err)
+            res.status(400).send('Unable to save document to ToDos collection')
+          })
+      }
+    })
 
   })
 
@@ -65,14 +65,23 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
 
   })
 
-  app.post('/get-todos', (req, res) => {
+  app.get('/get-todo/:id', (req, res) => {
+    const id = req.params.id
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send('Invalid to-do ID')
+    }
+
     db.collection('ToDos')
-      .find(req.body)
-      .toArray()
-      .then((docs) => {
-        res.send(docs)
+      .findOne({ _id : ObjectId(id) })
+      .then((todo) => {
+        if (!todo) {
+          return res.status(404).send('No to-do found')
+        }
+        todo.youSearchedAt = new Date()
+        res.json(todo)
       }, (err) => {
-        res.status(400).send(err)
+        res.status(400).send()
       })
   })
 
@@ -84,11 +93,36 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {
           console.log(`Deleting to-do: ${JSON.stringify(req.body)}`)
           res.status(200).send()
         })
-    } catch (error) {
-      console.log(error)
-      res.status(400).send()
+    } catch (err) {
+      console.log(err)
+      res.status(400).send('Unable to delete todo', err)
     }
+  })
 
+  app.get('/delete-all', (req, res) => {
+    db.collection('ToDos')
+      .deleteMany({})
+      .then((result) => {
+        res.send(result)
+      }, (err) => {
+        res.status(400).send('Unable to clear list of to-dos', err)
+      })
+  })
+
+  app.get('/get-user/:nickname', (req, res) => {
+    const userName = req.body
+    const userNickname = req.params
+
+    db.collection('Users')
+      .findOne(userNickname)
+      .then((user) => {
+        if (!user) {
+          return res.send('User not found')
+        }
+        res.json(user)
+      }, (err) => {
+        res.status(400).send('Unable to find user in db', err)
+      })
   })
 
 })

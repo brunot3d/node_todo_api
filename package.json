@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha server/**/*.test.js --timeout 10000",
-    "test-watch" : "nodemon --exec \"npm test\""
+    "test-watch": "nodemon --exec \"npm test\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
+    "joi": "^14.3.1",
     "mongodb": "^3.1.10"
   },
   "devDependencies": {
