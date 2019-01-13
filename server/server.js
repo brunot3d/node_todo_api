@@ -15,7 +15,7 @@ const todoSchema = Joi.object().keys({
 })
 
 
-MongoClient.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp', {
+MongoClient.connect('mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb' || 'mongodb://localhost:27017/TodoApp', {
   useNewUrlParser: true
 }, (err, client) => {
   if (err) {
