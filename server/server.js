@@ -2,20 +2,24 @@ const { MongoClient, ObjectID } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
 const Joi = require('joi')
+
+Joi.ObjectID = require('joi-ObjectID')(Joi)
 const app = express()
 const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
 
 const todoSchema = Joi.object().keys({
+  _id : Joi.ObjectID().default(),
   text : Joi.string().required(),
   completed: Joi.boolean().default(false),
   completedAt: Joi.any().default(null),
   createdAt: Joi.date().default(new Date)
 })
 
-
-MongoClient.connect('mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb' || 'mongodb://localhost:27017/TodoApp', {
+//'mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb'
+MongoClient.connect
+('mongodb://localhost:27017/TodoApp', {
   useNewUrlParser: true
 }, (err, client) => {
   if (err) {
@@ -29,6 +33,8 @@ MongoClient.connect('mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds25578
   app.post('/add-todo', (req, res) => {
     const newTodo = req.body
 
+    console.log(newTodo)
+    
     Joi.validate(newTodo, todoSchema, (err, result) => {
       if (err) {
         const error = new Error('Invalid Input')
@@ -36,6 +42,9 @@ MongoClient.connect('mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds25578
         error.status = 404
         res.status(404).send(error)
       } else {
+        if (result._id) {
+          result._id = new ObjectID(result._id)
+        }
         db.collection('ToDos')
           .insertOne(result)
           .then((result) => {
