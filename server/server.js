@@ -23,7 +23,7 @@ const todoSchema = Joi.object().keys({
 //  brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb
 //  'mongodb://localhost:27017'
 
-MongoClient.connect('brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb', {
+MongoClient.connect('mongodb://brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb', {
   useNewUrlParser: true
 }, (err, client) => {
   if (err) {
