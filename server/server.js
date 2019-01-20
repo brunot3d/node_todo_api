@@ -12,15 +12,16 @@ const port = process.env.PORT || 3000
 app.use(bodyParser.json())
 
 const todoSchema = Joi.object().keys({
-  _id: Joi.objectId()
+  _id: Joi.objectId(),
   text : Joi.string().required(),
   completed: Joi.boolean().default(false),
   completedAt: Joi.any().default(null),
   createdAt: Joi.date().default(new Date)
 })
 
-//'mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb'
-//brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb
+//  'mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb'
+//  brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb
+//  'mongodb://localhost:27017'
 
 MongoClient.connect('brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb', {
   useNewUrlParser: true
