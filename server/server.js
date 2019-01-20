@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000
 app.use(bodyParser.json())
 
 const todoSchema = Joi.object().keys({
-  _id : Joi.objectId(),
+  _id: Joi.objectId()
   text : Joi.string().required(),
   completed: Joi.boolean().default(false),
   completedAt: Joi.any().default(null),
