@@ -4,7 +4,8 @@ const bodyParser = require('body-parser')
 const Joi = require('joi')
 const _ = require('lodash')
 
-Joi.ObjectID = require('joi-ObjectID')(Joi)
+Joi.ObjectID = require('joi-objectID')(Joi)
+
 const app = express()
 const port = process.env.PORT || 3000
 
