@@ -2,17 +2,17 @@ const { MongoClient, ObjectID } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
 const Joi = require('joi')
+
+Joi.objectId = require('joi-objectid')(Joi)
+
 const _ = require('lodash')
-
-Joi.ObjectID = require('joi-objectID')(Joi)
-
 const app = express()
 const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
 
 const todoSchema = Joi.object().keys({
-  _id : Joi.ObjectID().default(),
+  _id : Joi.objectId(),
   text : Joi.string().required(),
   completed: Joi.boolean().default(false),
   completedAt: Joi.any().default(null),
@@ -20,9 +20,9 @@ const todoSchema = Joi.object().keys({
 })
 
 //'mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb'
+//brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb
 
-MongoClient.connect
-('mongodb://brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb', {
+MongoClient.connect('brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb', {
   useNewUrlParser: true
 }, (err, client) => {
   if (err) {
