@@ -2,6 +2,7 @@ const { MongoClient, ObjectID } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
 const Joi = require('joi')
+const _ = require('lodash')
 
 Joi.ObjectID = require('joi-ObjectID')(Joi)
 const app = express()
@@ -145,11 +146,38 @@ MongoClient.connect
       })
   })
 
+  app.patch('/todos/:id', (req, res) => {
+    const id = req.params.id
+    const body = _.pick(req.body, [ 'text', 'completed' ])
+
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send('Invalid to-do Id format')
+    }
+
+    if (_.isBoolean(body.completed) && body.completed) {
+      body.completedAt = new Date().getTime()
+    } else {
+      body.completed = false
+      body.completedAt = null
+    }
+    db.collection('ToDos')
+      .findOneAndUpdate(
+        { _id : ObjectID(id) }, 
+        { $set: body },
+        { returnOriginal:false })
+      .then((doc) => {
+        if (!doc) return res.status(404).send('Unable to find todo')
+        res.send({ doc })
+      })
+      .catch((err) => {
+        if (err) return res.status(400).send('Unable to update todo')
+      })
+  })
+
 })
 
 app.listen(port, () => {
   console.log(`Server started on port ${port}`)
-  
 })
 
 module.exports = {

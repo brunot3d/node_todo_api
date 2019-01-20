@@ -107,7 +107,7 @@ describe('GET /get-todo/:id', () => {
 })
 
 describe('DELETE /delete-todo/:id', () => {
-  it('should remve a todo', (done) => {
+  it('should remove a todo', (done) => {
     const hexId = todos[0]._id.toHexString()
 
     request(app)
@@ -144,6 +144,26 @@ describe('DELETE /delete-todo/:id', () => {
   })
 })
 
+describe('PATCH /todos/:id', () => {
+  it('Should updated specific todo providing ID', (done) => {
+    const body = {
+      text : 'UPDATING from tests 4',
+      completed: true
+    }
+
+    request(app)
+      .patch('/todos/5c44e26952768e0988427ff2')
+      .send(body)
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err)
+        expect(res.body.doc.value.text).toBe(body.text)
+        expect(res.body.doc.value.completed).toBe(body.completed)
+        done()
+      })
+  })
+
+})
 // describe('GET /delete-all', () => {
 //   it('should delete all documents in to-dos collection'), (done) => {
 //     request(app)
