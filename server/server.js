@@ -1,3 +1,5 @@
+require('../config/config')
+
 const { MongoClient, ObjectID } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -7,7 +9,7 @@ Joi.objectId = require('joi-objectid')(Joi)
 
 const _ = require('lodash')
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT
 
 app.use(bodyParser.json())
 
@@ -20,16 +22,16 @@ const todoSchema = Joi.object().keys({
 })
 
 //  'mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb'
-//  brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb
+//  'mongodbbrunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb'
 //  'mongodb://localhost:27017'
 
-MongoClient.connect('mongodb://brunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb', {
+MongoClient.connect(process.env.MONGO_URI, {
   useNewUrlParser: true
 }, (err, client) => {
   if (err) {
     return console.log('Unable to connect to server')
   }
-  const db = client.db('brunotdb')
+  const db = client.db()
   
   console.log('Connected to DB')
   app.emit('appStarted')

@@ -1,14 +1,18 @@
 const expect = require('expect')
 const request = require('supertest')
-const { app } = require('../server')
-const { ObjectId } = require('mongodb')
+const {
+  app
+} = require('../server')
+const {
+  ObjectId
+} = require('mongodb')
 
 let todos = [ {
-  _id : new ObjectId(),
-  text : 'nozes primerão'
+  _id: new ObjectId(),
+  text: 'nozes primerão - from tests'
 }, {
-  _id : new ObjectId(),
-  text :  'from tests 2'
+  _id: new ObjectId(),
+  text: 'from tests 2'
 } ]
 
 
@@ -18,18 +22,23 @@ before((done) => {
   })
 })
 
+
+it('should delete all documents in to-dos collection', (done) => {
+  request(app)
+    .get('/delete-all')
+    .expect(200)
+    .end(done)
+})
+
 describe('POST /add-todo', () => {
   it('should create a new todo', (done) => {
-    const text = {
-      text : 'from tests'
-    }
 
     request(app)
       .post('/add-todo')
       .send(todos[0])
       .expect(200)
       .expect((res) => {
-        console.log(res.body.document.text)
+        // console.log(res.body.document.text)
         expect(res.body.document.text).toBe(todos[0].text)
       })
       .end((err, res) => {
@@ -106,6 +115,29 @@ describe('GET /get-todo/:id', () => {
   })
 })
 
+describe('PATCH /todos/:id', () => {
+  it('Should updated a todo', (done) => {
+    const body = {
+      text : 'UPDATING from tests 4',
+      completed: true
+    }
+    const id = todos[0]._id.toHexString()
+
+    request(app)
+      .patch(`/todos/${id}`)
+      .send(body)
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err)
+        expect(res.body.doc.value.text).toBe(body.text)
+        expect(res.body.doc.value.completed).toBe(body.completed)
+        expect(typeof res.body.doc.value.completedAt).toBe('number')
+        done()
+      })
+  })
+
+})
+
 describe('DELETE /delete-todo/:id', () => {
   it('should remove a todo', (done) => {
     const hexId = todos[0]._id.toHexString()
@@ -121,7 +153,7 @@ describe('DELETE /delete-todo/:id', () => {
           return done(err)
         }
         request(app)
-          .get('/get-todo/${hexId}')
+          .get(`/get-todo/${hexId}`)
           .expect(404)
           .end((err, res) => {
             if (err)
@@ -144,35 +176,3 @@ describe('DELETE /delete-todo/:id', () => {
   })
 })
 
-describe('PATCH /todos/:id', () => {
-  it('Should updated specific todo providing ID', (done) => {
-    const body = {
-      text : 'UPDATING from tests 4',
-      completed: true
-    }
-
-    request(app)
-      .patch('/todos/5c44e26952768e0988427ff2')
-      .send(body)
-      .expect(200)
-      .end((err, res) => {
-        if (err) return done(err)
-        expect(res.body.doc.value.text).toBe(body.text)
-        expect(res.body.doc.value.completed).toBe(body.completed)
-        done()
-      })
-  })
-
-})
-// describe('GET /delete-all', () => {
-//   it('should delete all documents in to-dos collection'), (done) => {
-//     request(app)
-//       .get('/delete-all')
-//       .expect(200)
-//       .expect((res) => {
-//         console.log(res.body.length)
-//         expect(res.body.length).toBe(0)
-//       })
-//       .end(done)
-//   }
-// })
