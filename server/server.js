@@ -201,10 +201,9 @@ MongoClient.connect(process.env.MONGO_URI, {
 
 })
 
-app.listen(port, () => {
-  console.log('port', port)
+app.listen(process.env.PORT || 3000, () => {
   console.log('process', process.env.PORT)
-  console.log(`Server started on port ${port}`)
+  console.log(`Server started on port ${process.env.PORT}`)
 })
 
 module.exports = {
