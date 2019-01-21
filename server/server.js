@@ -11,6 +11,9 @@ const _ = require('lodash')
 const app = express()
 const port = process.env.PORT
 
+console.log('port', port)
+console.log('process', process.env.PORT)
+
 app.use(bodyParser.json())
 
 const todoSchema = Joi.object().keys({
