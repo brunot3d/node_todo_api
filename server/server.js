@@ -1,6 +1,9 @@
 require('../config/config')
 
-const { MongoClient, ObjectID } = require('mongodb')
+const {
+  MongoClient,
+  ObjectID
+} = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
 const Joi = require('joi')
@@ -11,14 +14,11 @@ const _ = require('lodash')
 const app = express()
 const port = process.env.PORT
 
-console.log('port', port)
-console.log('process', process.env.PORT)
-
 app.use(bodyParser.json())
 
 const todoSchema = Joi.object().keys({
   _id: Joi.objectId(),
-  text : Joi.string().required(),
+  text: Joi.string().required(),
   completed: Joi.boolean().default(false),
   completedAt: Joi.any().default(null),
   createdAt: Joi.date().default(new Date)
@@ -35,7 +35,7 @@ MongoClient.connect(process.env.MONGO_URI, {
     return console.log('Unable to connect to server')
   }
   const db = client.db()
-  
+
   console.log('Connected to DB')
   app.emit('appStarted')
 
@@ -43,7 +43,7 @@ MongoClient.connect(process.env.MONGO_URI, {
     const newTodo = req.body
 
     console.log(newTodo)
-    
+
     Joi.validate(newTodo, todoSchema, (err, result) => {
       if (err) {
         const error = new Error('Invalid Input')
@@ -57,7 +57,12 @@ MongoClient.connect(process.env.MONGO_URI, {
         db.collection('ToDos')
           .insertOne(result)
           .then((result) => {
-            res.status(200).json({ result : result, document : result.ops[0], msg: 'Successfuly inserted to-do', error : null })
+            res.status(200).json({
+              result: result,
+              document: result.ops[0],
+              msg: 'Successfuly inserted to-do',
+              error: null
+            })
           }, (err) => {
             console.log('Unable to save document to ToDos collection')
             console.log(err)
@@ -76,7 +81,10 @@ MongoClient.connect(process.env.MONGO_URI, {
         .toArray()
 
       console.log('Listing all to-dos')
-      res.send({ length : result.length, results: result } )
+      res.send({
+        length: result.length,
+        results: result
+      })
 
     } catch (error) {
       console.log(error)
@@ -93,7 +101,9 @@ MongoClient.connect(process.env.MONGO_URI, {
     }
 
     db.collection('ToDos')
-      .findOne({ _id : ObjectID(id) })
+      .findOne({
+        _id: ObjectID(id)
+      })
       .then((todo) => {
         if (!todo) {
           return res.status(404).send('No to-do found')
@@ -114,7 +124,9 @@ MongoClient.connect(process.env.MONGO_URI, {
       }
 
       await db.collection('ToDos')
-        .deleteOne({ _id : new ObjectID(id) }, (err, result) => {
+        .deleteOne({
+          _id: new ObjectID(id)
+        }, (err, result) => {
           if (err) throw err
           console.log(`Deleting to-do (_id:${JSON.stringify(id)})`)
           if (result.result.n === 0) {
@@ -169,13 +181,18 @@ MongoClient.connect(process.env.MONGO_URI, {
       body.completedAt = null
     }
     db.collection('ToDos')
-      .findOneAndUpdate(
-        { _id : ObjectID(id) }, 
-        { $set: body },
-        { returnOriginal:false })
+      .findOneAndUpdate({
+        _id: ObjectID(id)
+      }, {
+        $set: body
+      }, {
+        returnOriginal: false
+      })
       .then((doc) => {
         if (!doc) return res.status(404).send('Unable to find todo')
-        res.send({ doc })
+        res.send({
+          doc
+        })
       })
       .catch((err) => {
         if (err) return res.status(400).send('Unable to update todo')
@@ -185,6 +202,8 @@ MongoClient.connect(process.env.MONGO_URI, {
 })
 
 app.listen(port, () => {
+  console.log('port', port)
+  console.log('process', process.env.PORT)
   console.log(`Server started on port ${port}`)
 })
 
