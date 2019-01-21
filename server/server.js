@@ -13,8 +13,6 @@ Joi.objectId = require('joi-objectid')(Joi)
 const _ = require('lodash')
 const app = express()
 
-const port =  process.env.PORT || 3000
-
 
 app.use(bodyParser.json())
 
@@ -29,7 +27,7 @@ const todoSchema = Joi.object().keys({
 //  'mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb'
 //  'mongodbbrunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb'
 //  'mongodb://localhost:27017'
-
+console.log('mongo.uri', process.env.MONGO_URI)
 MongoClient.connect(process.env.MONGO_URI, {
   useNewUrlParser: true
 }, (err, client) => {
@@ -203,8 +201,8 @@ MongoClient.connect(process.env.MONGO_URI, {
 
 })
 
-app.listen(port || 3000, () => {
-  console.log(`Server started on port ${port}`)
+app.listen(process.env.PORT, () => {
+  console.log(`Server started on port ${process.env.PORT}`)
 })
 
 module.exports = {
