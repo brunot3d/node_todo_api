@@ -1,13 +1,10 @@
 var env = process.env.NODE_ENV || 'development'
 
-console.log(process.env.PORT)
 console.log('env *****', env)
 
 if (env = 'development') {
-  process.env.PORT = 3000
   process.env.MONGO_URI = 'mongodb://localhost:27017/brunotdb'
 } else if (env === 'test') {
-  process.env.PORT = 3000
   process.env.MONGO_URI = 'mongodb://localhost:27017/TodoApp'
 } else if (env === 'production') {
   console.log('from cfg', process.env.PORT)
