@@ -7,27 +7,19 @@ const {
 const express = require('express')
 const bodyParser = require('body-parser')
 const Joi = require('joi')
+const jwt = require('jsonwebtoken')
 
 Joi.objectId = require('joi-objectid')(Joi)
 
 const _ = require('lodash')
 const app = express()
-
+// const userSchema = require('../models/user')
+const userMethods = require('../models/user')
+const todoSchema = require('../models/todo')
 
 app.use(bodyParser.json())
 
-const todoSchema = Joi.object().keys({
-  _id: Joi.objectId(),
-  text: Joi.string().required(),
-  completed: Joi.boolean().default(false),
-  completedAt: Joi.any().default(null),
-  createdAt: Joi.date().default(new Date)
-})
 
-//  'mongodb://brunot3d:c5d80f05347e3789623cdb10d3b5dbc5@ds255784.mlab.com:55784/brunotdb'
-//  'mongodbbrunot:c965492a50b519451be98427ea60397b@ds255784.mlab.com:55784/brunotdb'
-//  'mongodb://localhost:27017'
-console.log('mongo.uri', process.env.MONGO_URI)
 MongoClient.connect(process.env.MONGO_URI, {
   useNewUrlParser: true
 }, (err, client) => {
@@ -151,7 +143,6 @@ MongoClient.connect(process.env.MONGO_URI, {
   })
 
   app.get('/get-user/:nickname', (req, res) => {
-    const userName = req.body
     const userNickname = req.params
 
     db.collection('Users')
@@ -198,6 +189,46 @@ MongoClient.connect(process.env.MONGO_URI, {
         if (err) return res.status(400).send('Unable to update todo')
       })
   })
+
+  app.post('/users', (req, res) => {
+    const user = _.pick(req.body, [ 'email', 'password' ])
+
+    Joi.validate(user.email, userMethods.validateEmail, (err, userDoc) => {
+      if (err) {
+        console.log('Error In validation: ', err)
+
+        return res.status(400).send(err.details[0].message)
+      }
+
+      db.collection('Users')
+        .findOne(user)
+        .then((doc) => {
+          if (!doc) {
+            const access = 'auth'
+            const userId = new ObjectID()
+            const token = userMethods.generateAuthToken(access, userId)
+
+            user.tokens = [ { access, token } ]
+            user._id = userId
+
+            db.collection('Users')
+              .insertOne(user)
+              .then((userObj) => {
+                res.header('x-auth', token).send(_.pick(userObj.ops[0], [ '_id', 'email' ]))
+              }, (err) => {
+                res.status(400).send('User sign up failure')
+              })
+          } else {
+            res.status(400).send('User already registered')
+          }
+
+        }, (err) => {
+          return res.status(404).send('Bad request')
+        })
+
+    })
+  })
+
 
 })
 
